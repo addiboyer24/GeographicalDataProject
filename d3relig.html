@@ -1,0 +1,57 @@
+<html>
+
+<head>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+    
+<style>
+    .area:hover{
+        shape-rendering: crispEdges;
+        background-color:red;
+    }
+</style>
+
+
+<body style="background-color:darkblue;">
+    
+    <div id="map-case"></div>
+    
+</body>
+
+<script>
+    
+var canvas = d3.select("body").append("svg").attr("width",1500).attr("height",900)
+    
+// Make a color scale for economy
+var color = d3.scale.linear().domain([1,7]).range(["darkgreen","white"]);
+    
+d3.json("custom.geo.json", function(data){
+    console.log(data);
+    var group = canvas.selectAll("g").data(data.features).enter().append("g");
+    
+    var projection = d3.geo.mercator().scale(195).translate([700,600]);
+    var path = d3.geo.path().projection(projection);
+    
+    var areas = group.append("path").attr("d",path).attr("class", "area").attr("fill", function(d){return color(d.properties.economy[0]);}).attr("stroke","black").attr("stroke-width",1);
+    
+    group.append("text").attr("x", function (d){ return path.centroid(d)[0];}).attr("y", function (d){ return path.centroid(d)[1];});
+    
+    areas.on("mouseover", function(e){ //Get the event
+        d3.select(this).transition().duration(500).style("cursor","pointer").attr("stroke-width",2.25);   
+    });
+    
+    areas.on("mouseout", function(e){ //Get the event
+       
+        d3.select(this).transition().duration(500).style("cursor","pointer").attr("stroke-width",1).attr("stroke","black");
+        
+    
+    });
+    
+    
+});
+
+</script>
+
+</html>
+
