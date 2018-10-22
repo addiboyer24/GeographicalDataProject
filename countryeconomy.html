@@ -1,0 +1,172 @@
+<html>
+
+<head>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+</head>
+    
+    <style>
+    .header{
+        position:fixed;
+        top: 0;
+        width:100%;
+    }
+    a{
+        padding-right:20px;
+        text-align:center;
+        font-size:20;
+        color:white;
+    }
+        
+    </style>
+    
+    
+<body style="background-color:darkblue;">
+    <h2 class="header" id="country" style="color:white; font-size:40; text-align:center;">World countries by economic status</h2>
+    <a href="geocommentary.html#vis1">Commentary</a>
+    <a href="geohypothesis.html">Previous</a><a href="countryincome.html">Next</a>
+    <select id="filter" onchange="filterMap();">
+        <option selected disabled>Filtering options</option>
+        <option value="1">Show None</option>
+        <option value="2">Oil and Petroleum Locations</option>
+        <option value="3">Dispute Locations</option>
+        <option value="4">Show All</option>
+    </select>
+</body>
+
+<script>
+    
+// Make the header sticky to move with the map 
+window.onscroll = moveHeader;
+var countryLabel = document.getElementById("country");
+var offset = countryLabel.offsetTop;
+
+// Set the height and width of the canvas
+var oil;
+var countryLocations;
+var height = 900, width = 1500;
+var countrySelect;
+var strokeWidth = .4;
+var group, group2, group3, path;
+var zoomDuration = 1000;
+var canvas = d3.select("body").append("svg").attr("width",width).attr("height",height);
+var projection;
+
+    
+// Make a color scale for economy
+var color = d3.scale.linear().domain([1,7]).range(["darkgreen","white"]);
+    
+// Read in the files, use a queue to load asychronously 
+queue().defer(d3.json, 'custom.geo.json').defer(d3.csv,'MIDLOCI_2.0.csv').defer(d3.json, 'oilandpetrol.json').await(makeMap);
+
+function makeMap(error, data, otherData, petrolData){
+    
+    canvas.append("circle").attr("cx",25).attr("cy", 550).attr("r",5).attr("fill", "black");
+canvas.append("text").attr("x",25).attr("y",575).attr("fill","white").text("Oil and Petroleum rich regions"); 
+ canvas.append("circle").attr("cx",25).attr("cy", 600).attr("r",5).attr("fill", "red");
+canvas.append("text").attr("x",25).attr("y",625).attr("fill","white").text("Interstate disputes since 1990");
+    // Make the scale for the map
+    canvas.append("text").attr("x",0).attr("y",180).attr("fill", "white").text("Economy").attr("font-size",12);
+    for(var i = 0; i <= 6; ++i){
+        canvas.append("rect").attr("x",0).attr("y", 200+40*i).attr("width",50).attr("height",40).attr("fill", color(i+1));
+        canvas.append("text").attr("x",20).attr("y",200+38*(i+1)).attr("fill", "black").text(i+1);
+    }
+    
+    
+    // Set up groups to hold the country areas
+    group = canvas.selectAll("g").data(data.features).enter().append("g");
+    
+    // The projection to be used for the map
+    projection = d3.geo.stereographic().scale(150).translate([600,450]);
+    path = d3.geo.path().projection(projection);
+    
+    // Draw the countries and fill them with the color scale
+    var areas = group.append("path").attr("d",path).attr("class", "area").attr("fill", function(d){return color(parseInt(d.properties.economy[0]));}).attr("stroke","black").attr("stroke-width",strokeWidth);
+    
+    // Set up groups to hold the incidents and fill them with red
+    group2 =
+    canvas.selectAll("circles").data(otherData).enter().append("circle").attr("cx", function(d){ return projection([d.midloc2_xlongitude,d.midloc2_ylatitude])[0];}).attr("cy", function(d){ return projection([d.midloc2_xlongitude,d.midloc2_ylatitude])[1]}).attr("r","2px").attr("fill","red").attr("stroke","black").attr("stroke-width",".1px").style("opacity", 1).style("visibility", "hidden");
+    
+    // Set up groups to hold the oil and petroleum areas
+    group3 = canvas.selectAll("g3").data(petrolData.features).enter().append("g");
+    
+    // Fill these areas with black
+    oil = group3.append("path").attr("d",path).attr("class", "oil").attr("fill", "black").attr("stroke", "black").attr("stroke-width", .5).style("visibility", "hidden");
+    
+    
+    // Mouseover, mouseout, and click functions for the disputes
+    group2.on("mouseover", function(e){
+        d3.select(this).transition(500).style("cursor", "pointer").attr("fill","yellow").style("visibility", "visible"); 
+    });
+    group2.on("mouseout", function(e){
+        d3.select(this).transition(500).style("cursor", "pointer").attr("fill","red"); 
+    });
+    
+    group2.on("click", function(e){
+        
+        window.alert("Dispute location: " + e.midloc2_location + "\n" + "Year: " + e.year);
+    });
+    
+    // Mouseover and mouseout functions for the countries
+    areas.on("mouseover", function(e){ //Get the event
+    strokeWidth = 1;    d3.select(this).transition().duration(500).style("cursor","pointer").attr("stroke-width",strokeWidth);
+        
+    d3.select("h2").text(e.properties.name + " " + e.properties.economy);
+        
+    });
+ 
+    
+    areas.on("mouseout", function(e){ //Get the event
+    strokeWidth = .4;
+        d3.select(this).transition().duration(500).style("cursor","pointer").attr("stroke-width",strokeWidth).attr("stroke","black").attr("stroke-width",strokeWidth);
+        d3.select("#country").text("World countries by economic status");
+    }); 
+    
+    // Mouseover and mouseout functions for the oil and petroleum areas
+     oil.on("mouseover", function(e){
+        d3.select(this).transition().duration(500).style("cursor", "pointer").attr("fill", "gold");
+        d3.select("h2").text(e.properties.NAME);
+    });
+    
+    oil.on("mouseout", function(e){
+        d3.select(this).transition().duration(500).style("cursor", "pointer").attr("fill", "black");
+        d3.select("h2").text("World countries by economic status");
+    });
+    
+}
+    
+function filterMap(){
+    var option = document.getElementById("filter").value;
+    
+    if(option == 1){ // Show nothing but base map
+        group2.style("visibility", "hidden");
+        oil.style("visibility", "hidden");
+    }
+    else if(option == 2){ // Show locations of petroleum and gas
+        oil.style("visibility", "visible");
+        group2.style("visibility", "hidden");
+    }
+    else if(option == 3){ // Show locations of disputes
+        oil.style("visibility", "hidden");
+        group2.style("visibility", "visible");
+    }
+    else{ // Show all locations
+        group2.style("visibility", "visible");
+        oil.style("visibility", "visible");
+    }
+}
+    
+function moveHeader(){
+    if(window.pageYOffset > offset){
+        countryLabel.classList.add("sticky");
+    }
+    else{
+        countryLabel.classList.remove("sticky");
+    }
+}
+
+</script>
+
+</html>
+

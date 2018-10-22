@@ -5,15 +5,27 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="http://d3js.org/queue.v1.min.js"></script>
 </head>
-    
+   
+<style>
+    .header{
+        position:fixed;
+        top: 0;
+        width:100%;
+    }
+</style>
     
 <body style="background-color:darkblue;">
-    <h2 id="country" style="color:white; font-size:40; text-align:center;">World</h2>
+    <h2 class="header" id="country" style="color:white; font-size:40; text-align:center;">World</h2>
     <div id="map-case"></div>
     
 </body>
 
 <script>
+// Make the header sticky to move with the map 
+window.onscroll = moveHeader;
+var countryLabel = document.getElementById("country");
+var offset = countryLabel.offsetTop;
+    
 // Set the height and width of the canvas
 var countryLocations;
 var height = 900, width = 1500;
@@ -35,7 +47,7 @@ function makeMap(error, data, otherData){
     console.log(data);
     group = canvas.selectAll("g").data(data.features).enter().append("g");
     
-    var projection = d3.geo.mercator().scale(195).translate([700,600]);
+    var projection = d3.geo.stereographic().scale(150).translate([600,450]);
     path = d3.geo.path().projection(projection);
     
     var areas = group.append("path").attr("d",path).attr("class", "area").attr("fill", function(d){return color(d.properties.economy[0]);}).attr("stroke","black").attr("stroke-width",strokeWidth).on("click",zoomOnClick);
@@ -90,8 +102,16 @@ function zoomOnClick(d){
     group.selectAll("path").classed("active", countrySelect && function(d){ return d == countrySelect;});
     
     group.transition().duration(zoomDuration).attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -xCoord + "," + -yCoord + ")").style("stroke-width", strokeWidth/k + "px");
-    
-    
+      
+}
+
+function moveHeader(){
+    if(window.pageYOffset > offset){
+        countryLabel.classList.add("sticky");
+    }
+    else{
+        countryLabel.classList.remove("sticky");
+    }
 }
 
 </script>

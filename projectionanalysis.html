@@ -1,0 +1,79 @@
+<html>
+    
+    
+    <head>
+        <title>Geo. Projection Analysis</title>
+        <!--Library for Math Equations -->
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+
+    </head>
+    <style>
+     a{
+            
+            padding-right:20px;
+        }
+    </style>
+    
+    <body>
+        
+        <center><h1>Projection Analysis</h1>
+        <h2>Maps built with d3.js using geo.projection library</h2></center>
+        
+        <ol>
+            
+            <li><h3>Mercator projection</h3></li>
+                <p> The mercator projection is a cylindrical projection commonly used for navigational purposes.  Cylindrical projections take an approximated sphere of the Earth, a globe, and project its latitudes and longitudes onto a cylinder.  This cylinder is then unrolled to produce a planar map.  In a map produced with the mercator projection, areas become more distorted as you move north and south of the equator.
+                    The equations for the x and y coordinates of a mercator projection are the following,<br>
+                    <center>$$x = {W\over 2\pi}(\lambda - \lambda_0),$$ $$y = {W\over 2\pi}\ln\bigg[{\tan\Big({{\pi \over 4} + {\rho \over 2}}\Big)}\bigg]$$</center>
+                    <br>
+                    <br>
+                    where,
+                    <ul>
+                    <li>\(W\) represents the map width or \(2\pi R\) where \(R\) represents the globe radius.</li>
+                    <li>\(\lambda\) represents the longitude of the location being projected.</li>
+                    <li>\(\lambda_0\) represents the central meridian of the map.</li>
+                    <li>\(\rho\) represents the latitude of the location being projected.</li>
+                    </ul>
+            
+                </p>
+            <li><h3>Equirectangular projection</h3></li>
+                <p> The equirectangular projection is another cylindrical projection.  This projection maps meridians to equally spaced vertical strait lines.  It also maps latitude circles to equally spaced horizontal strait lines. The projection introduces distortions that give the projection little use in navigation.  However, its main use is in thematic mapping.  For example, the projection is useful when dealing with raster datasets due to the simple relationship between pixel position and geographic location.
+                    The equations for the x and y coordinates of a equirectangular projection are the following,<br>
+                    <center>$$x = (\lambda - \lambda_0)\cos{\rho_1},$$
+                        $$y = (\rho - \rho_1)$$</center>
+                    <br><br>
+                    where,
+                    <ul>
+                    <li>\(\lambda\) represents the longitude of the location being projected.</li>
+                    <li>\(\lambda_0\) represents the central meridian of the map.</li>
+                     <li>\(\rho\) represents the latitude of the location being projected.</li>
+                     <li>\(\rho_1\) represents the standard parallels where the scale of the projection is true.</li>
+                    </ul>
+                </p>
+            <li><h3>Stereographic projection</h3></li>
+                <p> The stereographic projection is angle-preserving (conformal), and finds its main use in navigation.  When centered at the north or south pole of the earth the projection sends meridians to rays emanting from the origin.  Also, it sends parallels to circles centered at the origin.  The projection utilizes a representation of the earth characterized by the pythagorean triple identity, \(x^2+y^2+z^2=1\).  
+                    The equations for the x and y coordinates of a stereographic projection are the following,<br>
+                    <center>$$x = {x' \over{1-z}},$$
+                        $$y = {y' \over {1-z}}$$</center>
+                    <br>
+                    <br>
+                    where,
+                    <ul>
+                    <li>\(x'\) represents the \(x\) coordinate of the pythagorean triple of the ellipsoid.</li>
+                    <li>\(y'\) represents the \(y\) coordinate of the pythagorean triple of the ellipsoid.
+                    <li>\(z\) represents the \(z\) coordinate of the pythagorean triple of the ellipsoid.</li>
+                    </li>
+                    </ul>
+                </p>
+        
+        </ol>
+<p>Information on this page found <a href="https://en.wikipedia.org/wiki/List_of_map_projections">here.</a></p>
+
+<center><a href="africarefuting.html">Previous</a><a href="goodbadgeo.html">Next</a></center>
+    
+    
+    
+    </body>
+
+
+</html>
